@@ -1,0 +1,8 @@
+FROM locustio/locust:0.14.4
+
+# Add the external tasks directory into /tasks
+ADD locustfile.py /locustfile.py
+
+# Expose the required Locust ports
+EXPOSE 5557 5558 8089
+

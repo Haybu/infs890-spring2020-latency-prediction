@@ -1,0 +1,57 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: pgprometheus
+  labels:
+    app: pgprometheus
+  namespace: metricsdb
+spec:
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: pgprometheus
+  template:
+    metadata:
+      name: pgprometheus
+      labels:
+        app: pgprometheus
+    spec:
+      volumes:
+      - name: pg-volume
+        gcePersistentDisk:
+          pdName: pg-disk
+          fsType: ext4
+#        persistentVolumeClaim:
+#          claimName: pvclaim
+      containers:
+      - name: pgprometheus
+        image: timescale/pg_prometheus:0.2.2-pg11
+        args:
+        - "-csynchronous_commit=off"
+        env:
+        - name: PGDATA
+          value: "/var/lib/postgresql/data/pgdata"
+        - name: POSTGRES_DB
+          value: "postgres"
+        - name: POSTGRES_USER
+          value: "postgres"
+        - name: POSTGRES_PASSWORD
+          value: "mypassword"
+        ports:
+        - name: pg-http
+          containerPort: 5432
+#        resources:
+#          limits:
+#            cpu: 70m
+#            memory: 30Mi
+#          requests:
+#            cpu: 50m
+#            memory: 20Mi
+        volumeMounts:
+        - name: pg-volume
+          mountPath: /var/lib/postgresql/data

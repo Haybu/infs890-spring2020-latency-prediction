@@ -1,0 +1,42 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: pg-adapter
+  labels:
+    app: pg-adapter
+  namespace: metricsdb
+spec:
+  replicas: 3
+  strategy:
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: pg-adapter
+  template:
+    metadata:
+      name: pg-adapter
+      labels:
+        app: pg-adapter
+    spec:
+      containers:
+      - name: pg-adapter
+        image: timescale/prometheus-postgresql-adapter:0.6.0
+        args:
+          - "-pg.host=pgprometheus"
+          - "-pg.user=postgres"
+          - "-pg.password=mypassword"
+          - "-pg.prometheus-log-samples=true"
+        ports:
+          - name: pgadapter-http
+            containerPort: 9201
+  #    - name: pg-prometheus
+  #      image: timescale/pg_prometheus:0.2
+  #      env:
+  #        - name: csynchronous_commit
+  #          value: "off"
+  #      ports:
+  #        - name: postgres-http
+  #          containerPort: 5432
