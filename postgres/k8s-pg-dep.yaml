@@ -4,7 +4,7 @@ metadata:
   name: pgprometheus
   labels:
     app: pgprometheus
-  namespace: metricsdb
+  namespace: default
 spec:
   replicas: 1
   strategy:
@@ -26,11 +26,9 @@ spec:
         gcePersistentDisk:
           pdName: pg-disk
           fsType: ext4
-#        persistentVolumeClaim:
-#          claimName: pvclaim
       containers:
       - name: pgprometheus
-        image: timescale/pg_prometheus:0.2.2-pg11
+        image: timescale/pg_prometheus:latest-pg11
         args:
         - "-csynchronous_commit=off"
         env:

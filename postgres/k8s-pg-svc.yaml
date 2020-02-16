@@ -6,7 +6,7 @@ metadata:
     prometheus.io.port: '9187'
   labels:
     app: pgprometheus
-  namespace: metricsdb
+  namespace: default
 spec:
   selector:
     app: pgprometheus

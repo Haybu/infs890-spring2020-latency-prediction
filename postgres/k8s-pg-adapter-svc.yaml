@@ -4,7 +4,7 @@ metadata:
   name: pg-adapter
   labels:
     app: pg-adapter
-  namespace: metricsdb
+  namespace: default
 spec:
   selector:
     app: pg-adapter
