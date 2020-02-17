@@ -48,4 +48,4 @@ $ kubectl apply -f /Users/hmohamed/github/infs890-spring2020-latency-prediction/
 
 $ kubectl apply -f /Users/hmohamed/github/infs890-spring2020-latency-prediction/locust/k8s-manifests/locust-master-service.yaml 
 
-kubectl apply -f /Users/hmohamed/github/infs890-spring2020-latency-prediction/locust/k8s-manifests/locust-worker-dep.yaml
+$ kubectl apply -f /Users/hmohamed/github/infs890-spring2020-latency-prediction/locust/k8s-manifests/locust-worker-dep.yaml

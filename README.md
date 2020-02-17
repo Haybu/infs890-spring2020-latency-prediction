@@ -68,10 +68,7 @@ $ gcloud beta container clusters update myk8s --update-addons=Istio=ENABLED --is
 $ kubectl create namespace istio-system
 
 // install the default profile
-$ istioctl manifest apply --set values.kiali.enabled=true --set values.grafana.enabled=true
-
-wait for all to come up
-$ kubectl -n istio-system wait --for=condition=complete job --all
+$ istioctl manifest apply --set values.kiali.enabled=true --set values.grafana.enabled=true --set values.tracing.enabled=true
 
 ### Verify that all 23 Istio CRDs were committed to the Kubernetes api-server using the following command:
 
@@ -85,26 +82,44 @@ $ echo "$INGRESS_HOST"
 $ curl -v "http://$INGRESS_HOST"
 
 ### to access prometheus
+
+use:  $ istioctl dashboard prometheus
+
+or proxy
 - reference: https://istio.io/docs/tasks/telemetry/querying-metrics/
 $ kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=prometheus -o jsonpath='{.items[0].metadata.name}') 9090:9090 &
 
 Visit http://localhost:9090/graph in your web browser.
 
 ### to access grafana UI
+
+use:  $ istioctl dashboard grafana
+
+or proxy
+
 kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=grafana -o jsonpath='{.items[0].metadata.name}') 3000:3000
 
 Visit  http://localhost:3000/dashboard/db/istio-dashboard
 
 ### to view Jaeger UI
+
+use:  $ istioctl dashboard jaeger
+
+or proxy
+
 kubectl port-forward -n istio-system $(kubectl get pod -n istio-system -l app=jaeger -o jsonpath='{.items[0].metadata.name}') 16686:16686
 
 Visit http://localhost:16686
 
 ### to view Kiali UI
+
 set the secret for kiali first
 $ kubectl create secret generic kiali -n istio-system --from-literal "username=admin" --from-literal "passphrase=admin" -n istio-system
 
-then proxy
+use:  $ istioctl dashboard kiali
+
+or proxy
+
 $ kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=kiali -o jsonpath='{.items[0].metadata.name}') 20001:20001
 
 Visit  http://localhost:20001/kiali/console
@@ -119,8 +134,7 @@ $ kubectl create -f /Users/hmohamed/github/infs890-spring2020-latency-prediction
 $ helm install node-exporter-v1 --namespace exporters /Users/hmohamed/github/infs890-spring2020-latency-prediction/prometheus/prometheus-node-exporter
 
 ### install application in default namespace
-The demo application to deploy is cloned from https://github.com/GoogleCloudPlatform/microservices-demo.git
-I have cloned it inside this path in my machine /Users/hmohamed/github/infs890-ml-sre-app/
+The demo application to deploy is cloned from https://github.com/GoogleCloudPlatform/microservices-demo.git. I have cloned it inside this path in my machine /Users/hmohamed/github/infs890-ml-sre-app/
 
 $ kubectl apply -f /Users/hmohamed/github/infs890-ml-sre-app/microservices-demo/istio-manifests -n default
 

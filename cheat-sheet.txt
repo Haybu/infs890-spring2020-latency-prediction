@@ -1,0 +1,8 @@
+switch k8s Context
+---------—————————
+
+Kubectl config use-context  gke_agile-handy-sandbox-1_us-central1-a_infs890
+
+Kubectl config use-context gke_agile-handy-sandbox-1_us-central1-a_k8s-locust
+
+Kubectl config use-context gke_agile-handy-sandbox-1_us-central1-a_k8s-db
