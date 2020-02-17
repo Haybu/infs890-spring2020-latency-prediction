@@ -15,20 +15,20 @@ $ gcloud beta container clusters create infs890 \
   --no-enable-legacy-authorization \
   --preemptible \
   --enable-stackdriver-kubernetes \
-  --zone us-west1-a
+  --zone us-central1-a
 
 ### create new node pool
 $ gcloud beta container node-pools create infs890-pool --cluster infs890 \
-    --enable-autoscaling --min-nodes 5 --max-nodes 10 --machine-type=n1-standard-4 --zone us-west1-a   
+    --enable-autoscaling --min-nodes 5 --max-nodes 10 --machine-type=n1-standard-4 --zone us-central1-a   
 
 ### remove the default pool
-gcloud beta container node-pools delete default-pool --cluster infs890 --zone us-west1-a  
+gcloud beta container node-pools delete default-pool --cluster infs890 --zone us-central1-a  
 
 ## set gcloud config with default cluster
 $ gcloud config set container/cluster infs890
 
 ### get k8s credentials
-$ gcloud container clusters get-credentials infs890 --zone us-west1-a
+$ gcloud container clusters get-credentials infs890 --zone us-central1-a
 
 ### add cluster admin role for dashboard
 $ kubectl apply -f /Users/hmohamed/github/infs890-spring2020-latency-prediction/k8s-dashboard/dashboard-admin.yaml -n kube-system

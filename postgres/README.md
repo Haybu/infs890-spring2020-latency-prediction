@@ -3,7 +3,7 @@
 
 $ gcloud config set project agile-handy-sandbox-1
 
-$ gcloud config set compute/zone us-west1-a
+$ gcloud config set compute/zone us-central1-a
 
 $ gcloud beta container clusters create k8s-db \
   --cluster-version=latest \
@@ -17,11 +17,11 @@ $ gcloud beta container clusters create k8s-db \
   --no-enable-legacy-authorization \
   --preemptible \
   --enable-stackdriver-kubernetes \
-  --zone us-west1-a
+  --zone us-central1-a
 
 $ gcloud config set container/cluster k8s-db
 
-$ gcloud container clusters get-credentials k8s-db --zone us-west1-a
+$ gcloud container clusters get-credentials k8s-db --zone us-central1-a
 
 ## k8s dashboard
 ### add cluster admin role for dashboard
@@ -34,7 +34,7 @@ $ kubectl create -f /Users/hmohamed/github/infs890-spring2020-latency-prediction
 
 ## create a disk
 
-$ gcloud beta compute disks create pg-disk --size 200GB --type pd-standard --zone us-west1-a
+$ gcloud beta compute disks create pg-disk --size 200GB --type pd-standard --zone us-central1-a
 
 ### install
 

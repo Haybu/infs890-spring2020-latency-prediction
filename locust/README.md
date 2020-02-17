@@ -3,7 +3,7 @@
 ### create a new cluster 
 $ gcloud config set project agile-handy-sandbox-1
 
-$ gcloud config set compute/zone us-west1-a
+$ gcloud config set compute/zone us-central1-a
 
 $ gcloud beta container clusters create k8s-locust \
   --cluster-version=latest \
@@ -18,11 +18,11 @@ $ gcloud beta container clusters create k8s-locust \
   --num-nodes=4 \
   --preemptible \
   --enable-stackdriver-kubernetes \
-  --zone us-west1-a
+  --zone us-central1-a
 
 $ gcloud config set container/cluster k8s-locust
 
-$ gcloud container clusters get-credentials k8s-locust --zone us-west1-a
+$ gcloud container clusters get-credentials k8s-locust --zone us-central1-a
 
 ### add cluster admin role for dashboard
 $ kubectl apply -f /Users/hmohamed/github/infs890-spring2020-latency-prediction/k8s-dashboard/dashboard-admin.yaml -n kube-system
