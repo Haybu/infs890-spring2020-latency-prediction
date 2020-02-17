@@ -35,7 +35,7 @@ spec:
     spec:
       containers:
         - name: locust-master
-          image: docker.io/haybu/locust-googleshop:v9
+          image: haybu/locust-googleshop-checkoutflow:v1
           imagePullPolicy: Always
           env:     
             - name: TARGET_URL              

@@ -70,6 +70,9 @@ $ kubectl create namespace istio-system
 // install the default profile
 $ istioctl manifest apply --set values.kiali.enabled=true --set values.grafana.enabled=true
 
+wait for all to come up
+$ kubectl -n istio-system wait --for=condition=complete job --all
+
 ### Verify that all 23 Istio CRDs were committed to the Kubernetes api-server using the following command:
 
 $ kubectl get crds -n istio-system | grep 'istio.io\|certmanager.k8s.io' | wc -l
@@ -98,7 +101,11 @@ kubectl port-forward -n istio-system $(kubectl get pod -n istio-system -l app=ja
 Visit http://localhost:16686
 
 ### to view Kiali UI
-kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=kiali -o jsonpath='{.items[0].metadata.name}') 20001:20001
+set the secret for kiali first
+$ kubectl create secret generic kiali -n istio-system --from-literal "username=admin" --from-literal "passphrase=admin" -n istio-system
+
+then proxy
+$ kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=kiali -o jsonpath='{.items[0].metadata.name}') 20001:20001
 
 Visit  http://localhost:20001/kiali/console
 

@@ -49,8 +49,9 @@ def addToCart(l):
         'product_id': product,
         'quantity': random.choice([1,2,3,4,5,10])})
 
-def checkout(l):
-    addToCart(l)
+def checkout(l):    
+    for x in range(random.choice([1,2])):
+        addToCart(l)
     l.client.post("/cart/checkout", {
         'email': 'someone@example.com',
         'street_address': '1600 Amphitheatre Parkway',
@@ -69,16 +70,18 @@ class UserBehavior(TaskSet):
     def on_start(self):
         index(self)
 
-    tasks = {index: 1,
+    tasks = {
+        index: 1,
         setCurrency: 2,
         browseProduct: 10,
         addToCart: 2,
         viewCart: 3,
-        checkout: 1}
+        checkout: 1
+        }
 
 class WebsiteUser(HttpLocust):
     task_set = UserBehavior
-    wait_time = between(1, 10)
+    wait_time = between(1, 8)
     #min_wait = 1000
     #max_wait = 10000
 
