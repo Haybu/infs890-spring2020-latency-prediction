@@ -40,6 +40,6 @@ spec:
           imagePullPolicy: Always
           env:
             - name: TARGET_URL        
-              value: http://34.69.13.29
+              value: http://35.232.41.173
             - name: LOCUST_OPTS  
               value: '--slave --master-host=locust-master --master-port=5557'              
