@@ -1,3 +1,4 @@
+"variable","time","val"
 svc_req_rate,2020-02-20 12:32:06,5.33
 svc_req_rate,2020-02-20 12:36:06,8.44
 svc_req_rate,2020-02-20 12:49:51,17.69
