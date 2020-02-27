@@ -1,5 +1,5 @@
 
-# Research Simulation - Data - Jupyter Notebook
+# End-to-end Latency prediction of  Research Simulation - Data - Jupyter Notebook
 
 ## Installing the demo application with Istio on GKE
 
@@ -146,3 +146,8 @@ $ gcloud auth configure-docker -q
 
 ***** deploy from inside microservices-demo folder
 $ skaffold run --default-repo=gcr.io/agile-handy-sandbox-1 --namespace default
+
+**** you can autoscale istio mixer to speed metric collection
+
+this already exists, no need to apply
+###kubectl autoscale deployment istio-telemetry --cpu-percent=80 --min=1 --max=10 -n istio-system
