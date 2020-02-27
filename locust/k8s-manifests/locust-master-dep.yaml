@@ -39,7 +39,7 @@ spec:
           imagePullPolicy: Always
           env:     
             - name: TARGET_URL              
-              value: http://35.223.167.164
+              value: http://104.200.22.218
             - name: LOCUST_OPTS  
               value: '--master --step-load --print-stats --master-port=8089'
           ports:
