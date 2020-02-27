@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: pgprometheus
@@ -23,9 +23,8 @@ spec:
     spec:
       volumes:
       - name: pg-volume
-        gcePersistentDisk:
-          pdName: pg-disk
-          fsType: ext4
+        persistentVolumeClaim:
+          claimName: pg-disk-pvc
       containers:
       - name: pgprometheus
         image: timescale/pg_prometheus:latest-pg11

@@ -13,4 +13,4 @@ subjects:
   name: kubernetes-dashboard
   namespace: kube-system
 - kind: User
-  name: haytham_mohamed@gmail.com
+  name: lke-admin

@@ -14,7 +14,7 @@
 
 
 kind: Deployment
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 metadata:
   name: locust-worker
   labels:
@@ -40,6 +40,6 @@ spec:
           imagePullPolicy: Always
           env:
             - name: TARGET_URL        
-              value: http://104.200.22.218
+              value: http://45.79.61.35
             - name: LOCUST_OPTS  
               value: '--slave --master-host=locust-master --master-port=5557'              

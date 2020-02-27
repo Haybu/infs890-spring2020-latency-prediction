@@ -5,38 +5,12 @@
 
 ### create a k8s cluster
 
-$ gcloud beta container clusters create infs890 \
-  --cluster-version=latest \
-  --machine-type=n1-standard-4 \
-  --enable-autoscaling --num-nodes 5 --min-nodes 5 --max-nodes 10 \
-  --max-nodes-per-pool 100 \
-  --enable-autorepair \
-  --enable-autoupgrade \
-  --scopes=service-control,service-management,compute-rw,storage-ro,cloud-platform,logging-write,monitoring-write,pubsub,datastore \
-  --labels=purpose=research \
-  --tags=http-server,https-server \
-  --no-enable-legacy-authorization \
-  --preemptible \
-  --enable-stackdriver-kubernetes \
-  --zone us-central1-a
-
-### create new node pool
-$ gcloud beta container node-pools create infs890-pool --cluster infs890 \
-    --enable-autoscaling --min-nodes 5 --max-nodes 10 --machine-type=n1-standard-4 --zone us-central1-a   
-
-### remove the default pool
-gcloud beta container node-pools delete default-pool --cluster infs890 --zone us-central1-a  
-
-## set gcloud config with default cluster
-$ gcloud config set container/cluster infs890
-
-### get k8s credentials
-$ gcloud container clusters get-credentials infs890 --zone us-central1-a
+create a cluster via the Linode console
 
 ### add cluster admin role for dashboard
 $ kubectl apply -f /Users/hmohamed/github/infs890-spring2020-latency-prediction/k8s-dashboard/dashboard-admin.yaml -n kube-system
 
-$ kubectl create clusterrolebinding myname-cluster-admin-binding --clusterrole=cluster-admin --user=haytham.mohamed@gmail.com 
+$ kubectl create clusterrolebinding myname-cluster-admin-binding --clusterrole=cluster-admin --user=haybu@hotmail.com 
 
 ### deploy kubernetes dashboard
 $ kubectl create -f /Users/hmohamed/github/infs890-spring2020-latency-prediction/k8s-dashboard/dashboard.yaml
@@ -139,13 +113,9 @@ $ helm install node-exporter-v1 --namespace exporters /Users/hmohamed/github/inf
 ### install application in default namespace
 The demo application to deploy is cloned from https://github.com/GoogleCloudPlatform/microservices-demo.git. I have cloned it inside this path in my machine /Users/hmohamed/github/infs890-ml-sre-app/
 
-$ kubectl apply -f /Users/hmohamed/github/infs890-ml-sre-app/microservices-demo/istio-manifests -n default
+$ kubectl apply -f /Users/hmohamed/github/infs890-ml-sre-app/microservices-demo/release
 
-***** authenticate docker with gcr
-$ gcloud auth configure-docker -q
 
-***** deploy from inside microservices-demo folder
-$ skaffold run --default-repo=gcr.io/agile-handy-sandbox-1 --namespace default
 
-**** you can autoscale istio prometheus to speed metric collection
-kubectl autoscale deployment prometheus --cpu-percent=80 --min=1 --max=20 -n istio-system
+### after refreshing prometheus deployment with right configuratino, you can autscale it
+ $ kubectl autoscale deployment prometheus --cpu-percent=80 --min=1 --max=20 -n istio-system

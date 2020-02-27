@@ -14,9 +14,9 @@ data:
     global:
       scrape_interval: 15s
     remote_write:
-      - url: "http://35.193.46.107:9201/write"
+      - url: "http://104.200.23.55:9201/write"
     remote_read:
-      - url: "http://35.193.46.107:9201/read"
+      - url: "http://104.200.23.55:9201/read"
     rule_files:
       - "/etc/prometheus-rules/recording.rules"      
     scrape_configs:
