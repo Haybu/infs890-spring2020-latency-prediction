@@ -111,9 +111,11 @@ $ kubectl create -f /Users/hmohamed/github/infs890-spring2020-latency-prediction
 $ helm install node-exporter-v1 --namespace exporters /Users/hmohamed/github/infs890-spring2020-latency-prediction/prometheus/prometheus-node-exporter
 
 ### install application in default namespace
-The demo application to deploy is cloned from https://github.com/GoogleCloudPlatform/microservices-demo.git. I have cloned it inside this path in my machine /Users/hmohamed/github/infs890-ml-sre-app/
+The demo application to deploy is cloned from https://github.com/GoogleCloudPlatform/microservices-demo.git. I have cloned it and coppied its k8s minifest files from the "release" folder. 
 
-$ kubectl apply -f /Users/hmohamed/github/infs890-ml-sre-app/microservices-demo/release
+Run this command to install the demo app
+
+$ kubectl apply -f /Users/hmohamed/github/infs890-spring2020-latency-prediction/app-k8s
 
 
 
