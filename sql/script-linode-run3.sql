@@ -112,13 +112,31 @@ and (  labels ->> 'destination_service' like 'checkoutservice%'
 and time between '2020-02-27 22:49:50'::timestamp and '2020-02-28 20:44:00'::timestamp 
 ;
 
--- 7 latency: consider latency for all requests (successful and failed)
+-- 7-a latency: consider latency for all requests (successful and failed)
 select 'service_ltcy' as name, date_trunc('seconds',  time::timestamp) as ztime
 ,left(labels ->> 'destination_service', strpos(labels ->> 'destination_service', '.') - 1) service, value
 from metrics 
 where name = 'istio_request_duration_seconds_bucket'
 and labels ->> 'destination_service_namespace' = 'default'
---and labels ->> 'response_code' = 200
+--and labels ->> 'response_code' = '200'
+and (  labels ->> 'destination_service' like 'checkoutservice%'
+--	or labels ->> 'destination_service' like 'cartservice%'	
+--	or labels ->> 'destination_service' like 'emailservice%'
+--	or labels ->> 'destination_service' like 'currencyservice%'	
+--	or labels ->> 'destination_service' like 'paymentservice%'	
+--	or labels ->> 'destination_service' like 'productcatalogservice%'	
+--	or labels ->> 'destination_service' like 'shippingservice%'	
+)
+and time between '2020-02-27 22:49:50'::timestamp and '2020-02-28 20:44:00'::timestamp 
+;
+
+-- 7-b latency: consider latency for all requests (successful and failed)
+select 'service_ltcy' as name, date_trunc('seconds',  time::timestamp) as ztime
+,left(labels ->> 'destination_service', strpos(labels ->> 'destination_service', '.') - 1) service, value
+from metrics 
+where name = 'istio_request_duration_seconds_bucket'
+and labels ->> 'destination_service_namespace' = 'default'
+--and labels ->> 'response_code' = '200'
 and (  labels ->> 'destination_service' like 'checkoutservice%'
 --	or labels ->> 'destination_service' like 'cartservice%'	
 --	or labels ->> 'destination_service' like 'emailservice%'
@@ -293,7 +311,7 @@ group by name , ztime
 ;
 
 
-
+-- DO NOT USE BELOW QUERIES
 ---------------------------------------------------------------------------
 select 'svc_req_rate' as variable, time, round(cast(COALESCE(value,'NaN') as numeric) ,2) as val
 from (select distinct time, value, name, labels from metrics 
@@ -364,9 +382,7 @@ select 'system_cpu_use' as variable, time, round(cast(COALESCE(value,'NaN') as n
 from (select distinct time, value, name, labels from metrics 
 		where name = 'system:X_cpu_usage_total_seconds:sum_rate') as xmetrics
 where name = 'system:X_cpu_usage_total_seconds:sum_rate' 
-and (time between '2020-02-27 10:41:00'::timestamp and '2020-02-27 21:46:00'::timestamp
-  or time between '2020-02-27 22:49:50'::timestamp and '2020-02-28 20:44:00'::timestamp
-  )
+and time between '2020-02-27 22:49:50'::timestamp and '2020-02-28 20:44:00'::timestamp
 order by time
 ;
 
