@@ -201,6 +201,8 @@ and (  labels ->> 'pod' like 'checkoutservice%'
 and time between '2020-02-27 22:49:50'::timestamp and '2020-02-28 20:44:00'::timestamp 
 ;
 
+---- System
+
 -- 12 system cpu usage
 -- label_replace(sum(rate(node_cpu_seconds_total{mode!="idle",mode!="iowait",mode!~"^(?:guest.*)$"}[1m])) 
 --  by (node), "metric", "nodes_cpu_utilization_seconds" , "app", "(.*)")
@@ -213,26 +215,46 @@ and time between '2020-02-27 22:49:50'::timestamp and '2020-02-28 20:44:00'::tim
 ;
 
 
--- 13 system cpu sat
+--*** 13 system cpu sat  (needs special processing: devide sum of part1 by cound of part2)
 -- label_replace(sum(node_load1) by (node) / count(node_cpu_seconds_total{mode="system"}) 
 -- by (node) * 100 , "metric", "nodes_cpu_saturation_seconds" , "app", "(.*)")
+select 'system_cpu_sat_part1' as name, date_trunc('seconds',  time::timestamp) as ztime
+, left(labels ->> 'instance', strpos(labels ->> 'instance', ':') - 1) as node, value 
+from metrics 
+where name = 'node_load1' 
+;
 
-select name, time, left(labels ->> 'instance', strpos(labels ->> 'instance', ':') - 1) as node, value 
+select 'system_cpu_sat_part2' as name, date_trunc('seconds',  time::timestamp) as ztime
+, left(labels ->> 'instance', strpos(labels ->> 'instance', ':') - 1) as node, value
 from metrics 
 where name = 'node_cpu_seconds_total' 
-and labels ->> 'mode' != 'idle' and labels ->> 'mode' != 'iowait' and labels ->> 'mode' not like 'guest.%'
-fetch first 10 rows only;
+and labels ->> 'mode' = 'system'
+;
 
--- 14 system network usage
+--**** 14 system network usage (needs special processing: add sum of part1 to sum of part2)
 -- label_replace(sum(rate(node_network_receive_bytes_total[1m])) by (node) + sum(rate(node_network_transmit_bytes_total[1m])) 
--- by (node), "metric", "nodes_network_utilization_seconds" , "app", "(.*)")         
+-- by (node), "metric", "nodes_network_utilization_seconds" , "app", "(.*)")   
+select 'system_network_usage_part1' as name, date_trunc('seconds',  time::timestamp) as ztime
+, left(labels ->> 'instance', strpos(labels ->> 'instance', ':') - 1) as node, value 
+from metrics 
+where name = 'node_network_receive_bytes_total' 
+;
 
--- 15 system network sat (x)
+select 'system_network_usage_part2' as name, date_trunc('seconds',  time::timestamp) as ztime
+, left(labels ->> 'instance', strpos(labels ->> 'instance', ':') - 1) as node, value 
+from metrics 
+where name = 'node_network_transmit_bytes_total' 
+fetch first 100 rows only
+;
+
+-- 15 system disk usage
+-- label_replace(sum(node_filesystem_files_free{mountpoint="/"}) by (release) / sum(node_filesystem_files{mountpoint="/"}) by (release), "metric", "nodes_network_utilization_seconds" , "app", "(.*)")
+
+
+
+-- 16 system network sat (x)
 -- label_replace(sum(rate(node_network_receive_drop_total[1m])) by (node) + sum(rate(node_network_transmit_drop_total[1m])) 
 --   by (node), "metric", "nodes_network_saturation_seconds" , "app", "(.*)")
-
--- 16 system disk usage
--- label_replace(sum(node_filesystem_files_free{mountpoint="/"}) by (release) / sum(node_filesystem_files{mountpoint="/"}) by (release), "metric", "nodes_network_utilization_seconds" , "app", "(.*)")
 
 -- 17 system disk io  (x)
 -- label_replace(sum(rate(node_disk_io_time_weighted_seconds_total[1m])) 
