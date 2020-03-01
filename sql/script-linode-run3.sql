@@ -1,3 +1,5 @@
+-- **** containers
+
 -- 1
 -- containers cpu usage of all involved services
 select 'service_cpu_usage' as name, date_trunc('seconds',  time::timestamp) as ztime
@@ -92,15 +94,161 @@ and (labels ->> 'pod' like 'checkoutservice%'
 and time between '2020-02-27 22:49:50'::timestamp and '2020-02-28 20:44:00'::timestamp 
 ;
 
+-- **** istio services
+-- 6 request total
+select 'service_req_total' as name, date_trunc('seconds',  time::timestamp) as ztime
+,left(labels ->> 'destination_service', strpos(labels ->> 'destination_service', '.') - 1) service, value
+from metrics 
+where name = 'istio_requests_total'
+and labels ->> 'destination_service_namespace' = 'default'
+and (  labels ->> 'destination_service' like 'checkoutservice%'
+--	or labels ->> 'destination_service' like 'cartservice%'	
+--	or labels ->> 'destination_service' like 'emailservice%'
+--	or labels ->> 'destination_service' like 'currencyservice%'	
+--	or labels ->> 'destination_service' like 'paymentservice%'	
+--	or labels ->> 'destination_service' like 'productcatalogservice%'	
+--	or labels ->> 'destination_service' like 'shippingservice%'	
+)
+and time between '2020-02-27 22:49:50'::timestamp and '2020-02-28 20:44:00'::timestamp 
+;
+
+-- 7 latency: consider latency for all requests (successful and failed)
+select 'service_ltcy' as name, date_trunc('seconds',  time::timestamp) as ztime
+,left(labels ->> 'destination_service', strpos(labels ->> 'destination_service', '.') - 1) service, value
+from metrics 
+where name = 'istio_request_duration_seconds_bucket'
+and labels ->> 'destination_service_namespace' = 'default'
+--and labels ->> 'response_code' = 200
+and (  labels ->> 'destination_service' like 'checkoutservice%'
+--	or labels ->> 'destination_service' like 'cartservice%'	
+--	or labels ->> 'destination_service' like 'emailservice%'
+--	or labels ->> 'destination_service' like 'currencyservice%'	
+--	or labels ->> 'destination_service' like 'paymentservice%'	
+--	or labels ->> 'destination_service' like 'productcatalogservice%'	
+--	or labels ->> 'destination_service' like 'shippingservice%'	
+)
+and time between '2020-02-27 22:49:50'::timestamp and '2020-02-28 20:44:00'::timestamp 
+;
+
+-- 8  services error
+select 'service_errors' as name, date_trunc('seconds',  time::timestamp) as ztime
+,left(labels ->> 'destination_service', strpos(labels ->> 'destination_service', '.') - 1) service, value
+from metrics 
+where name = 'istio_request_duration_seconds_count'
+and labels ->> 'destination_service_namespace' = 'default'
+and labels ->> 'response_code' != '200'
+and (  labels ->> 'destination_service' like 'checkoutservice%'
+	or labels ->> 'destination_service' like 'cartservice%'	
+	or labels ->> 'destination_service' like 'emailservice%'
+	or labels ->> 'destination_service' like 'currencyservice%'	
+	or labels ->> 'destination_service' like 'paymentservice%'	
+	or labels ->> 'destination_service' like 'productcatalogservice%'	
+	or labels ->> 'destination_service' like 'shippingservice%'	
+)
+and time between '2020-02-27 22:49:50'::timestamp and '2020-02-28 20:44:00'::timestamp 
+;
+
+-- 9 request size
+iselect 'service_request_size' as name, date_trunc('seconds',  time::timestamp) as ztime
+,left(labels ->> 'destination_service', strpos(labels ->> 'destination_service', '.') - 1) service, value
+from metrics 
+where name = 'istio_request_bytes_sum'
+and labels ->> 'destination_workload_namespace' = 'default'
+and (  labels ->> 'destination_service' like 'checkoutservice%'
+	or labels ->> 'destination_service' like 'cartservice%'	
+	or labels ->> 'destination_service' like 'emailservice%'
+	or labels ->> 'destination_service' like 'currencyservice%'	
+	or labels ->> 'destination_service' like 'paymentservice%'	
+	or labels ->> 'destination_service' like 'productcatalogservice%'	
+	or labels ->> 'destination_service' like 'shippingservice%'	
+)
+and time between '2020-02-27 22:49:50'::timestamp and '2020-02-28 20:44:00'::timestamp
+;
+
+-- 10 response size
+select 'service_response_size' as name, date_trunc('seconds',  time::timestamp) as ztime
+,left(labels ->> 'destination_service', strpos(labels ->> 'destination_service', '.') - 1) service, value
+from metrics 
+where name = 'istio_response_bytes_sum'
+and labels ->> 'destination_workload_namespace' = 'default'
+and (  labels ->> 'destination_service' like 'checkoutservice%'
+	or labels ->> 'destination_service' like 'cartservice%'	
+	or labels ->> 'destination_service' like 'emailservice%'
+	or labels ->> 'destination_service' like 'currencyservice%'	
+	or labels ->> 'destination_service' like 'paymentservice%'	
+	or labels ->> 'destination_service' like 'productcatalogservice%'	
+	or labels ->> 'destination_service' like 'shippingservice%'	
+)
+and time between '2020-02-27 22:49:50'::timestamp and '2020-02-28 20:44:00'::timestamp 
+;
+
+-- 11 container count
+-- sum by (label_app) (sum by (pod, name_space) (kube_pod_container_status_running{namespace="default"}) * on (pod) 
+       -- group_left(label_app) kube_pod_labels)   
+select 'containers_count' as name, date_trunc('seconds',  time::timestamp) as ztime
+,left(labels ->> 'pod', strpos(labels ->> 'pod', '-') - 1) service, value
+from metrics 
+where name = 'kube_pod_container_status_running'
+and labels ->> 'namespace' = 'default'
+and (  labels ->> 'pod' like 'checkoutservice%'
+	or labels ->> 'pod' like 'cartservice%'	
+	or labels ->> 'pod' like 'emailservice%'
+	or labels ->> 'pod' like 'currencyservice%'	
+	or labels ->> 'pod' like 'paymentservice%'	
+	or labels ->> 'pod' like 'productcatalogservice%'	
+	or labels ->> 'pod' like 'shippingservice%'	
+)
+and time between '2020-02-27 22:49:50'::timestamp and '2020-02-28 20:44:00'::timestamp 
+;
+
+-- 12 system cpu usage
+-- label_replace(sum(rate(node_cpu_seconds_total{mode!="idle",mode!="iowait",mode!~"^(?:guest.*)$"}[1m])) 
+--  by (node), "metric", "nodes_cpu_utilization_seconds" , "app", "(.*)")
+select 'system_cpu_usage' as name, date_trunc('seconds',  time::timestamp) as ztime
+, left(labels ->> 'instance', strpos(labels ->> 'instance', ':') - 1) as node, value 
+from metrics 
+where name = 'node_cpu_seconds_total'
+and labels ->> 'mode' != 'idle' and labels ->> 'mode' != 'iowait' and labels ->> 'mode' not like 'guest.%'
+and time between '2020-02-27 22:49:50'::timestamp and '2020-02-28 20:44:00'::timestamp 
+;
+
+
+-- 13 system cpu sat
+-- label_replace(sum(node_load1) by (node) / count(node_cpu_seconds_total{mode="system"}) 
+-- by (node) * 100 , "metric", "nodes_cpu_saturation_seconds" , "app", "(.*)")
+
+select name, time, left(labels ->> 'instance', strpos(labels ->> 'instance', ':') - 1) as node, value 
+from metrics 
+where name = 'node_cpu_seconds_total' 
+and labels ->> 'mode' != 'idle' and labels ->> 'mode' != 'iowait' and labels ->> 'mode' not like 'guest.%'
+fetch first 10 rows only;
+
+-- 14 system network usage
+-- label_replace(sum(rate(node_network_receive_bytes_total[1m])) by (node) + sum(rate(node_network_transmit_bytes_total[1m])) 
+-- by (node), "metric", "nodes_network_utilization_seconds" , "app", "(.*)")         
+
+-- 15 system network sat (x)
+-- label_replace(sum(rate(node_network_receive_drop_total[1m])) by (node) + sum(rate(node_network_transmit_drop_total[1m])) 
+--   by (node), "metric", "nodes_network_saturation_seconds" , "app", "(.*)")
+
+-- 16 system disk usage
+-- label_replace(sum(node_filesystem_files_free{mountpoint="/"}) by (release) / sum(node_filesystem_files{mountpoint="/"}) by (release), "metric", "nodes_network_utilization_seconds" , "app", "(.*)")
+
+-- 17 system disk io  (x)
+-- label_replace(sum(rate(node_disk_io_time_weighted_seconds_total[1m])) 
+--    by (release) , "metric", "nodes_disk_io_time" , "app", "(.*)")
 
 
 
 --...................... above is good .....
 -- experiments
-select time, name, value, labels from metrics 
-where name = 'container_cpu_cfs_throttled_seconds_total'
-and labels ->> 'namespace' = 'default'
-and labels ->> 'pod' like 'checkoutservice%'
+
+select labels from metrics fetch first 3 rows only;
+
+select labels ->> 'destination_service' from metrics 
+where name = 'istio_requests_total'
+and labels ->> 'destination_service_namespace' = 'default'
+and labels ->> 'destination_service' like 'checkoutservice%'
 fetch first 3 rows only;
 
 
