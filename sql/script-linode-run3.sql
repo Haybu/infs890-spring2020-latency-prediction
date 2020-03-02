@@ -136,7 +136,7 @@ select 'service_ltcy' as name, date_trunc('seconds',  time::timestamp) as ztime
 from metrics 
 where name = 'istio_request_duration_seconds_bucket'
 and labels ->> 'destination_service_namespace' = 'default'
---and labels ->> 'response_code' = '200'
+and labels ->> 'response_code' = '200'
 and (  labels ->> 'destination_service' like 'checkoutservice%'
 --	or labels ->> 'destination_service' like 'cartservice%'	
 --	or labels ->> 'destination_service' like 'emailservice%'
@@ -146,6 +146,7 @@ and (  labels ->> 'destination_service' like 'checkoutservice%'
 --	or labels ->> 'destination_service' like 'shippingservice%'	
 )
 and time between '2020-02-27 22:49:50'::timestamp and '2020-02-28 20:44:00'::timestamp 
+fetch first 5 rows only
 ;
 
 -- 8  services error
