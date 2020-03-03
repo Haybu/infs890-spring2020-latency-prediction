@@ -1,0 +1,1 @@
+\copy (select 'system_network_receive' as name, date_trunc('seconds',  time::timestamp) as ztime, left(labels ->> 'instance', strpos(labels ->> 'instance', ':') - 1) as node, value from metrics where name = 'node_network_receive_bytes_total') TO '/Users/hmohamed/github/data-research-spring2020/raw-data-linode-run3/15_system_network_receive.csv' CSV HEADER

@@ -1,0 +1,1 @@
+\copy (select 'node_load1' as name, date_trunc('seconds',  time::timestamp) as ztime, left(labels ->> 'instance', strpos(labels ->> 'instance', ':') - 1) as node, value from metrics where name = 'node_load1') TO '/Users/hmohamed/github/data-research-spring2020/raw-data-linode-run3/13_node_load1.csv' CSV HEADER
