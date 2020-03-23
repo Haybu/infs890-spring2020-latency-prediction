@@ -144,7 +144,7 @@ $ kubectl apply -f /Users/hmohamed/github/infs890-ml-sre-app/microservices-demo/
 ***** authenticate docker with gcr
 $ gcloud auth configure-docker -q
 
-***** deploy from inside microservices-demo folder
+***** deploy from inside microservices-demo folder (infs890-ml-sre-app)
 $ skaffold run --default-repo=gcr.io/agile-handy-sandbox-1 --namespace default
 
 **** you can autoscale istio prometheus to speed metric collection
