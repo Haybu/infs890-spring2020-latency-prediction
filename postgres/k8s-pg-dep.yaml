@@ -24,10 +24,10 @@ spec:
       volumes:
       - name: pg-volume
         persistentVolumeClaim:
-          claimName: pg-disk-pvc
+          claimName: pg-disk-pvc-1
       containers:
       - name: pgprometheus
-        image: timescale/pg_prometheus:latest-pg11
+        image: timescale/pg_prometheus:0.2.2-pg11
         args:
         - "-csynchronous_commit=off"
         env:
