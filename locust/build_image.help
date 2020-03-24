@@ -1,0 +1,1 @@
+docker build -t haybu/locust-sockshop:v7 -f ./Dockerfile-sockshop .

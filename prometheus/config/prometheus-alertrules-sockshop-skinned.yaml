@@ -1,0 +1,71 @@
+# Useful examples on how to configure Prometheus
+# * https://www.weave.works/prometheus-and-kubernetes-monitoring-your-applications/
+# * https://grafana.net/dashboards/162
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-alertrules
+  namespace: istio-system
+data:
+  alert.rules: |
+    # Alert for high error rate in the Sock Shop.
+
+    ALERT HighErrorRate
+      IF rate(request_duration_seconds_count{status_code="500"}[5m]) > 1
+      FOR 5m
+      LABELS { severity = "slack" }
+      ANNOTATIONS {
+        summary = "High HTTP 500 error rates",
+        description = "Rate of HTTP 500 errors per 5 minutes: {{ $value }}",
+      }
+
+  recording.rules: |
+    groups:
+      - name: cpu_usage
+        interval: 15s
+        rules:
+        - record: service:X_cpu_usage_total_seconds:sum_rate
+          expr: sum by (label_app) ( sum by (pod) (label_replace(rate(container_cpu_usage_seconds_total{namespace="sock-shop"}[1m]), "pod_name", "$1" , "pod", "(.*)") ) * on (pod) group_left(label_app) kube_pod_labels{namespace="sock-shop"} )
+        - record: system:X_cpu_usage_total_seconds:sum_rate
+          expr: label_replace(sum(rate(node_cpu_seconds_total{mode!="idle",mode!="iowait",mode!~"^(?:guest.*)$"}[1m])) by (node), "metric", "nodes_cpu_utilization_seconds" , "app", "(.*)")          
+      - name: cpu_saturation
+        interval: 15s
+        rules:           
+        - record: service:X_cpu_saturation_total_seconds:sum_rate
+          expr: sum by (label_app) ( sum by (pod) (label_replace(rate(container_cpu_cfs_throttled_seconds_total{namespace="sock-shop"}[1m]), "pod_name", "$1" , "pod", "(.*)") ) * on (pod) group_left(label_app) kube_pod_labels{namespace="sock-shop"} )         
+        - record: system:X_cpu_saturation_total_seconds:sum
+          expr: label_replace(sum(node_load1) by (node) / count(node_cpu_seconds_total{mode="system"}) by (node) * 100 , "metric", "nodes_cpu_saturation_seconds" , "app", "(.*)")          
+      - name: network_usage
+        interval: 15s
+        rules:  
+        - record: service:X_network_usage_bytes_total:sum_rate
+          expr: sum by (label_app) ( sum by (pod) (label_replace(rate(container_network_receive_bytes_total{namespace="sock-shop"}[1m]), "pod_name", "$1" , "pod", "(.*)") ) * on (pod) group_left(label_app) kube_pod_labels{namespace="sock-shop"} ) + sum by (label_app) ( sum by (pod) (label_replace(rate(container_network_transmit_bytes_total{namespace="sock-shop"}[1m]), "pod_name", "$1" , "pod", "(.*)") ) * on (pod) group_left(label_app) kube_pod_labels{namespace="sock-shop"} )
+        - record: system:X_network_usage_bytes_total:sum_rate
+          expr: label_replace(sum(rate(node_network_receive_bytes_total[1m])) by (node) + sum(rate(node_network_transmit_bytes_total[1m])) by (node), "metric", "nodes_network_utilization_seconds" , "app", "(.*)") 
+      - name: disk_io
+        interval: 15s
+        rules:      
+        - record: service:X_disk_io_total_byte:sum_rate
+          expr: sum by (label_app) ( sum by (pod) (label_replace(rate(container_fs_io_time_seconds_total{namespace="sock-shop"}[1m]), "pod_name", "$1" , "pod", "(.*)") ) * on (pod) group_left(label_app) kube_pod_labels{namespace="sock-shop"} )
+        - record: system:X_disk_io_total_seconds:sum_rate
+          expr: label_replace(sum(rate(node_disk_io_time_weighted_seconds_total[1m])) by (release) , "metric", "nodes_disk_io_time" , "app", "(.*)")
+      - name: cluster
+        interval: 15s
+        rules:           
+        - record: service:X_container_count:sum
+          expr: sum by (label_app) (sum by (pod, name_space) (kube_pod_container_status_running{namespace="sock-shop"}) * on (pod) group_left(label_app) kube_pod_labels)          
+        - record: cluster:X_nodes_count:sum
+          expr: label_replace(sum(kube_node_labels) by (k8s_app), "metric", "number_of_nodes" , "app", "(.*)")            
+      - name: requests
+        interval: 15s
+        rules:
+        - record: service:X_requests_total:sum_rate
+          expr: sum(rate(istio_requests_total{destination_service_namespace="sock-shop"}[1m])) by (destination_service)
+      - name: latency
+        interval: 15s
+        rules:          
+        - record: service:X_95th_latency_seconds:sum_rate
+          expr: histogram_quantile(0.95, sum(rate(istio_request_duration_seconds_bucket{destination_service_namespace ="sock-shop", destination_service_name =~ ".+"}[1m])) by (destination_service_name, le) OR on() vector(0))
+        - record: service:X_95th_latency_success_seconds:sum_rate
+          expr: histogram_quantile(0.95, sum(rate(istio_request_duration_seconds_bucket{response_code="200", destination_service_namespace ="sock-shop", destination_service_name =~ ".+"}[1m])) by (destination_service_name, le) OR on() vector(0))
+          
