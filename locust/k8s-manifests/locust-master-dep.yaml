@@ -35,7 +35,7 @@ spec:
     spec:
       containers:
         - name: locust-master
-          image: haybu/locust-sockshop:v8
+          image: haybu/locust-sockshop:v10
 #          image: haybu/locust-googleshop-checkoutflow:v1
           imagePullPolicy: Always
           env:     

@@ -1,78 +1,71 @@
 import base64
 
-from locust import HttpLocust, TaskSet, task, between
+from locust import HttpLocust, TaskSet, task, between, TaskSequence, seq_task
 from random import randint, choice
 
-def index(l):
-    l.client.get("/")
+class UserBehavior(TaskSequence):
+    @seq_task(1)
+    @task(1)
+    def index(self):
+        self.locust.client.get("/")
 
-def login(l):
-    user1 = base64.encodebytes(('%s:%s' % ('Eve_Berger', 'eve')).encode()).replace('\n'.encode(), ''.encode()).decode('utf-8')
-    user2 = base64.encodebytes(('%s:%s' % ('user', 'password')).encode()).replace('\n'.encode(), ''.encode()).decode('utf-8')
-    user3 = base64.encodebytes(('%s:%s' % ('user1', 'password')).encode()).replace('\n'.encode(), ''.encode()).decode('utf-8')
-    user4 = base64.encodebytes(('%s:%s' % ('user2', 'password')).encode()).replace('\n'.encode(), ''.encode()).decode('utf-8')
-    user5 = base64.encodebytes(('%s:%s' % ('user3', 'password')).encode()).replace('\n'.encode(), ''.encode()).decode('utf-8')
-    user6 = base64.encodebytes(('%s:%s' % ('user4', 'password')).encode()).replace('\n'.encode(), ''.encode()).decode('utf-8')
-    user7 = base64.encodebytes(('%s:%s' % ('user5', 'password')).encode()).replace('\n'.encode(), ''.encode()).decode('utf-8')
-    user8 = base64.encodebytes(('%s:%s' % ('user6', 'password')).encode()).replace('\n'.encode(), ''.encode()).decode('utf-8')
-    user9 = base64.encodebytes(('%s:%s' % ('user7', 'password')).encode()).replace('\n'.encode(), ''.encode()).decode('utf-8')
-    user10 = base64.encodebytes(('%s:%s' % ('user8', 'password')).encode()).replace('\n'.encode(), ''.encode()).decode('utf-8')
-    user11 = base64.encodebytes(('%s:%s' % ('user9', 'password')).encode()).replace('\n'.encode(), ''.encode()).decode('utf-8')
-    user12 = base64.encodebytes(('%s:%s' % ('user10', 'password')).encode()).replace('\n'.encode(), ''.encode()).decode('utf-8')
-    
-    users = [user1, user2, user3, user4, user5, user6, user7, user8, user9, user10, user11, user12]
-    l.client.get("/login", headers={"Authorization":"Basic %s" % choice(users)}) 
+    @seq_task(2)
+    @task(2)
+    def browseProducts(self):
+        self.locust.client.get("/category.html")
 
-def logout(l):
-    l.client.cookies.clear()
+    @seq_task(3)
+    @task(2)
+    def viewProductDetails(self):
+        catalogue = self.locust.client.get("/catalogue").json()
+        item = choice(catalogue)
+        self.locust.client.get("/detail.html?id={}".format(item["id"]))       
 
-def browseProducts(l):
-    l.client.get("/category.html")
+    @seq_task(4)
+    @task(1)
+    def login(self):
+        user1 = base64.encodebytes(('%s:%s' % ('Eve_Berger', 'eve')).encode()).replace('\n'.encode(), ''.encode()).decode('utf-8')
+        user2 = base64.encodebytes(('%s:%s' % ('user', 'password')).encode()).replace('\n'.encode(), ''.encode()).decode('utf-8')
+        user3 = base64.encodebytes(('%s:%s' % ('user1', 'password')).encode()).replace('\n'.encode(), ''.encode()).decode('utf-8')
+        user4 = base64.encodebytes(('%s:%s' % ('user2', 'password')).encode()).replace('\n'.encode(), ''.encode()).decode('utf-8')
+        user5 = base64.encodebytes(('%s:%s' % ('user3', 'password')).encode()).replace('\n'.encode(), ''.encode()).decode('utf-8')
+        user6 = base64.encodebytes(('%s:%s' % ('user4', 'password')).encode()).replace('\n'.encode(), ''.encode()).decode('utf-8')
+        user7 = base64.encodebytes(('%s:%s' % ('user5', 'password')).encode()).replace('\n'.encode(), ''.encode()).decode('utf-8')
+        user8 = base64.encodebytes(('%s:%s' % ('user6', 'password')).encode()).replace('\n'.encode(), ''.encode()).decode('utf-8')
+        user9 = base64.encodebytes(('%s:%s' % ('user7', 'password')).encode()).replace('\n'.encode(), ''.encode()).decode('utf-8')
+        user10 = base64.encodebytes(('%s:%s' % ('user8', 'password')).encode()).replace('\n'.encode(), ''.encode()).decode('utf-8')
+        user11 = base64.encodebytes(('%s:%s' % ('user9', 'password')).encode()).replace('\n'.encode(), ''.encode()).decode('utf-8')
+        user12 = base64.encodebytes(('%s:%s' % ('user10', 'password')).encode()).replace('\n'.encode(), ''.encode()).decode('utf-8')
+        users = [user1, user2, user3, user4, user5, user6, user7, user8, user9, user10, user11, user12]
+        self.locust.client.get("/login", headers={"Authorization":"Basic %s" % choice(users)})  
 
-def selectProduct(l):
-    catalogue = l.client.get("/catalogue").json()
-    return choice(catalogue)
+    @seq_task(5)
+    @task(1)
+    def deleteCart(self):
+        self.locust.client.delete("/cart")
 
-def viewProductDetails(l):
-    item = selectProduct(l)
-    l.client.get("/detail.html?id={}".format(item["id"])) 
+    @seq_task(6)
+    @task(1)
+    def addToCart(self):
+        catalogue = self.locust.client.get("/catalogue").json()
+        item = choice(catalogue)
+        self.locust.client.post("/cart", json={"id": item["id"], "quantity": choice([1,2])})
 
-def deleteCart(l):
-    l.client.delete("/cart")
+    @seq_task(7)
+    @task(1)
+    def viewCart(self):
+        self.locust.client.get("/basket.html")    
 
-def addToCart(l):
-    item = selectProduct(l)
-    l.client.post("/cart", json={"id": item["id"], "quantity": choice([1,2])})
+    @seq_task(8)
+    @task(1)
+    def order(self):    
+        self.locust.client.post("/orders")
 
-def viewCart(l):
-    l.client.get("/basket.html")    
-
-def order(l):    
-    l.client.post("/orders")
-
-class UserBehavior(TaskSet):
-
-    def on_start(self):
-        index(self)
-
-    browse_num = choice([2,3,4,5])
-    view_detail_num = browse_num - 1
-
-    select_num = choice([1,2])
-
-    tasks = {
-        index: 1,
-        browseProducts: browse_num,
-        viewProductDetails: view_detail_num,
-        selectProduct: select_num,
-        login: 1,
-        deleteCart: 1,
-        addToCart: select_num,
-        viewCart: 1,
-        order: 1,
-        logout: 1
-        }
+    @seq_task(9)
+    @task(1)
+    def logout(self):
+        self.locust.client.cookies.clear()        
 
 class WebsiteUser(HttpLocust):
     task_set = UserBehavior
-    wait_time = between(1, 8)
+    wait_time = between(1, 8)  # in seconds
